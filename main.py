@@ -10,8 +10,8 @@ from selenium.webdriver.chrome.service import Service
 
 class LinkedIn:
     def __init__(self):
-        self.mail = "testmail"
-        self.password = "testpass"
+        self.mail = "testmail@gmail.com"
+        self.password = "testpass123"
 
         self.chrome_web = Service(r"D:\LinkedIn_Job_Analytics-main\LinkedIn_Job_Analytics-main\chromedriver-win64\chromedriver-win64\chromedriver.exe")
         self.driver = webdriver.Chrome(service=self.chrome_web)
