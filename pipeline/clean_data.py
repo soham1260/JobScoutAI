@@ -6,10 +6,6 @@ import numpy as np
 import re
 import hashlib
 from pymongo import MongoClient
-
-import re
-import hashlib
-from pymongo import MongoClient
 from dotenv import load_dotenv
 
 load_dotenv()
