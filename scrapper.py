@@ -36,8 +36,8 @@ def safe_get_text(driver, xpath, retries=3, delay=1, direct_text_only=False):
 
 class LinkedIn:
     def __init__(self):
-        self.mail = "1260soham@gmail.com"
-        self.password = "kdl43w950c"
+        self.mail = ""
+        self.password = ""
 
         self.chrome_web = Service(r"D:\LinkedIn_Job_Analytics-main\LinkedIn_Job_Analytics-main\chromedriver-win64\chromedriver-win64\chromedriver.exe")
         self.driver = webdriver.Chrome(service=self.chrome_web)
@@ -107,6 +107,15 @@ class LinkedIn:
             if jobs is None:
                 print(f"!!!!!!!!!!! Job listing {i} not found in both div[5] and div[6].\n")
                 continue
+
+            try:
+                designation = safe_get_text(
+                    self.driver,
+                    f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/h1/a'
+                )
+                page_data['Designation'].append(designation)
+            except NoSuchElementException:
+                page_data['Designation'].append(np.nan)
 
 obj = LinkedIn()
 obj.login()
