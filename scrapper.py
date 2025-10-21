@@ -88,8 +88,8 @@ class LinkedIn:
             jobs = None
             base_div = None
             xpaths = [
-                (6, f'/html/body/div[6]/div[3]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]'),
-                (5, f'/html/body/div[5]/div[3]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]')
+                (6, f'/html/body/div[6]/div[4]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]'),
+                (5, f'/html/body/div[5]/div[4]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]')
             ]
 
             for div_index, path in xpaths:
@@ -111,11 +111,20 @@ class LinkedIn:
             try:
                 designation = safe_get_text(
                     self.driver,
-                    f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/h1/a'
+                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/h1/a'
                 )
                 page_data['Designation'].append(designation)
             except NoSuchElementException:
                 page_data['Designation'].append(np.nan)
+
+            try:
+                company_name = safe_get_text(
+                    self.driver,
+                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[1]/div[1]/div/a'
+                )
+                page_data['Name'].append(company_name)
+            except NoSuchElementException:
+                page_data['Name'].append(np.nan)
 
 obj = LinkedIn()
 obj.login()
