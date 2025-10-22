@@ -125,6 +125,15 @@ class LinkedIn:
                 page_data['Name'].append(company_name)
             except NoSuchElementException:
                 page_data['Name'].append(np.nan)
+            
+            try:
+                com_location = safe_get_text(
+                    self.driver,
+                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[1]'
+                )
+                page_data['Location'].append(com_location)
+            except NoSuchElementException:
+                page_data['Location'].append(np.nan)
 
 obj = LinkedIn()
 obj.login()
