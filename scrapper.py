@@ -135,6 +135,34 @@ class LinkedIn:
             except NoSuchElementException:
                 page_data['Location'].append(np.nan)
 
+            try:
+                xpath =f"/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[4]/button"
+                buttons = self.driver.find_elements(By.XPATH, xpath)
+                texts = [safe_get_text(self.driver, f"({xpath})[{i+1}]") for i in range(len(buttons))]
+                et = np.nan
+                wt = np.nan
+                for text in texts:
+                    if text == "Full-time":
+                        et = "Full-time"
+                    elif text == "Internship":
+                        et = "Internship"
+                    elif text == "Contract":
+                        et = "Contract"
+                    elif text == "Temporary":
+                        et = "Temporary"
+                    elif text == "Remote":
+                        wt = "Remote"
+                    elif text == "On-site":
+                        wt = "On-site"
+                    elif text == "Hybrid":
+                        wt = "Hybrid"
+                page_data['employment_type'].append(et)
+                page_data['work_type'].append(wt)
+            except NoSuchElementException:
+                page_data['employment_type'].append(np.nan)
+                page_data['work_type'].append(np.nan)
+            time.sleep(1)
+
 obj = LinkedIn()
 obj.login()
 flag = [i for i in range(0, 500, 25)]
