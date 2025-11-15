@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BarChart3,
   TrendingUp,
@@ -25,6 +25,7 @@ import {
   RadialLinearScale,
 } from "chart.js";
 import { Bar, Line, Pie, Doughnut, Radar, PolarArea } from "react-chartjs-2";
+import { marked } from "marked";
 
 ChartJS.register(
   CategoryScale,
@@ -187,7 +188,14 @@ export default function JobScoutAI() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({ companies: 0, jobs: 0, cities: 0 });
+  const [open, setOpen] = useState(false);
+  const [Prompt,setPrompt] = useState("");
+  const [Response,setResponse] = useState("");
+  const [Generating,setGenerating] = useState(false);
+  const GeneratingRef = useRef(false);
 
+  const timeouts = useRef([]);
+  
   useEffect(() => {
     fetchStats();
   }, []);
@@ -197,6 +205,10 @@ export default function JobScoutAI() {
       fetchInsightData();
     }
   }, [selectedInsight]);
+
+  useEffect(() => {
+    GeneratingRef.current = Generating;
+  }, [Generating]);
 
   const fetchStats = async () => {
     try {
@@ -273,6 +285,43 @@ export default function JobScoutAI() {
     };
   };
 
+  const onPromptChange = (e) => {
+      setPrompt(e.target.value)
+    };
+
+    const handlePrompt = async() => {
+    setResponse("");
+    setGenerating(true);
+    fetch("http://localhost:5000/ai/query",{
+      method: 'Post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: Prompt,
+        path: selectedInsight.endpoint
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!GeneratingRef.current) {
+        return;
+      }
+      timeouts.current.forEach(clearTimeout);
+      timeouts.current = [];
+      const fullText = marked(data.response ? data.response : "Please Enter the message!");
+      for (let i = 0; i < fullText.length; i++) {
+        const timeout = setTimeout(() => {
+          setResponse(prev => prev + fullText.charAt(i));
+        }, i * 10);
+        timeouts.current.push(timeout);
+      }
+      const finalTimeout = setTimeout(() => {
+        setGenerating(false);
+      }, fullText.length * 10);
+      timeouts.current.push(finalTimeout);
+    });
+  }
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -317,7 +366,69 @@ export default function JobScoutAI() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100">
-      {/* Header */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="bg-gray-900 w-[95%] max-w-3xl rounded-2xl shadow-2xl border border-gray-700 p-6 relative animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+
+            {/* Title */}
+            <h2 className="text-xl font-semibold mb-4 text-gray-100 text-center">
+              AI Assistant
+            </h2>
+
+            {/* Textarea */}
+            <textarea
+              value={Prompt}
+              onChange={onPromptChange}
+              placeholder="Ask anything related to job insights..."
+              className="w-full h-32 resize-none border border-gray-700 bg-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+
+            {/* Response Box */}
+            {Response && <div
+              className="mt-4 text-sm text-gray-300 max-h-48 overflow-y-auto border border-gray-700 rounded-lg p-3 bg-gray-800"
+              dangerouslySetInnerHTML={{ __html: Response }}
+            />}
+
+            {/* Buttons */}
+            {Generating ? (
+              <button
+                type="button"
+                className="mt-4 w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700 transition"
+                onClick={() => {
+                  timeouts.current.forEach(clearTimeout);
+                  timeouts.current = [];
+                  setGenerating(false);
+                }}
+              >
+                Stop Generating
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
+                onClick={handlePrompt}
+              >
+                Ask
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+
       <header className="bg-gray-800/50 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -362,9 +473,20 @@ export default function JobScoutAI() {
         {/* Sidebar */}
         <aside className="w-64 flex-shrink-0">
           <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-4 sticky top-24">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            <div className="flex items-center justify-around py-3">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-0">
               Analytics
             </h2>
+
+            <button
+              onClick={() => setOpen(true)}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30"
+            >
+              ASK AI
+            </button>
+          </div>
+          
+
             <div className="space-y-1 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
               {INSIGHTS.map((insight) => {
                 const Icon = insight.icon;
@@ -471,6 +593,13 @@ export default function JobScoutAI() {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(99, 102, 241, 0.7);
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn .15s ease-out;
         }
       `}</style>
     </div>
