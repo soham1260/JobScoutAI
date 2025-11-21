@@ -176,6 +176,12 @@ class LinkedIn:
             except NoSuchElementException:
                 page_data['Industry'].append(np.nan)
 
+            try:
+                Employee_count = safe_get_text(self.driver, f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/section/section/div[1]/div[2]/span[1]')
+                page_data['Employee_count'].append(Employee_count)
+            except NoSuchElementException:
+                page_data['Employee_count'].append(np.nan)
+
 obj = LinkedIn()
 obj.login()
 flag = [i for i in range(0, 500, 25)]
