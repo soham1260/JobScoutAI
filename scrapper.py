@@ -170,6 +170,12 @@ class LinkedIn:
                 page_data['Total_applicants'].append(np.nan)
             time.sleep(1)
 
+            try:
+                Industry = safe_get_text(self.driver, f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/section/section/div[1]/div[2]',direct_text_only=True)
+                page_data['Industry'].append(Industry)
+            except NoSuchElementException:
+                page_data['Industry'].append(np.nan)
+
 obj = LinkedIn()
 obj.login()
 flag = [i for i in range(0, 500, 25)]
