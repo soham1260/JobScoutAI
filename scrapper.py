@@ -5,6 +5,9 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 import time
 import numpy as np
 from selenium.webdriver.chrome.service import Service
+import datetime
+from pymongo import MongoClient
+import pandas as pd
 
 def safe_get_text(driver, xpath, retries=3, delay=1, direct_text_only=False):
     for attempt in range(retries):
@@ -187,6 +190,26 @@ class LinkedIn:
                 page_data['LinkedIn_Followers'].append(followers)
             except NoSuchElementException:
                 page_data['LinkedIn_Followers'].append(np.nan)
+            
+        page_df = pd.DataFrame(page_data)
+        page_df['date'] = datetime.datetime.now()
+        return page_df
+
+    def create_and_store(self,page_df):
+        if page_df.empty:
+            print("page_df is empty. Skipping insertion.")
+            return
+        if isinstance(self.data, dict):
+            self.data = pd.DataFrame(self.data)
+        self.data = pd.concat([self.data, page_df], ignore_index=True)
+        print(page_df)
+        client = MongoClient("")
+        db = client['JobScoutAI_DB']
+        collection = db['DailyData']
+        records = page_df.to_dict(orient='records')
+        collection.insert_many(records)
+
+        print(f"{len(records)} records inserted successfully!")
 
 obj = LinkedIn()
 obj.login()
