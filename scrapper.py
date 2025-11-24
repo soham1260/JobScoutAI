@@ -1,13 +1,14 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 import time
+import pandas as pd
 import numpy as np
 from selenium.webdriver.chrome.service import Service
-import datetime
 from pymongo import MongoClient
-import pandas as pd
+import datetime
 
 def safe_get_text(driver, xpath, retries=3, delay=1, direct_text_only=False):
     for attempt in range(retries):
@@ -36,13 +37,14 @@ def safe_get_text(driver, xpath, retries=3, delay=1, direct_text_only=False):
                 time.sleep(delay)
             else:
                 return np.nan
+            
 
 class LinkedIn:
     def __init__(self):
         self.mail = ""
         self.password = ""
 
-        self.chrome_web = Service(r"D:\LinkedIn_Job_Analytics-main\LinkedIn_Job_Analytics-main\chromedriver-win64\chromedriver-win64\chromedriver.exe")
+        self.chrome_web = Service(r"C:\Users\soham\Downloads\chromedriver-win64\chromedriver-win64\chromedriver.exe")
         self.driver = webdriver.Chrome(service=self.chrome_web)
         
         self.data = {'Designation': [],
@@ -91,8 +93,8 @@ class LinkedIn:
             jobs = None
             base_div = None
             xpaths = [
-                (6, f'/html/body/div[6]/div[4]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]'),
-                (5, f'/html/body/div[5]/div[4]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]')
+                (6, f'/html/body/div[6]/div[3]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]'),
+                (5, f'/html/body/div[5]/div[3]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li[{i}]')
             ]
 
             for div_index, path in xpaths:
@@ -114,7 +116,7 @@ class LinkedIn:
             try:
                 designation = safe_get_text(
                     self.driver,
-                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/h1/a'
+                    f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/h1/a'
                 )
                 page_data['Designation'].append(designation)
             except NoSuchElementException:
@@ -123,16 +125,16 @@ class LinkedIn:
             try:
                 company_name = safe_get_text(
                     self.driver,
-                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[1]/div[1]/div/a'
+                    f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[1]/div[1]/div/a'
                 )
                 page_data['Name'].append(company_name)
             except NoSuchElementException:
                 page_data['Name'].append(np.nan)
-            
+
             try:
                 com_location = safe_get_text(
                     self.driver,
-                    f'/html/body/div[{base_div}]/div[4]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[1]'
+                    f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[1]'
                 )
                 page_data['Location'].append(com_location)
             except NoSuchElementException:
@@ -185,12 +187,13 @@ class LinkedIn:
             except NoSuchElementException:
                 page_data['Employee_count'].append(np.nan)
 
+
             try:
                 followers = safe_get_text(self.driver, f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/section/section/div[1]/div[1]/div/div[2]/div[2]')
                 page_data['LinkedIn_Followers'].append(followers)
             except NoSuchElementException:
                 page_data['LinkedIn_Followers'].append(np.nan)
-            
+                
         page_df = pd.DataFrame(page_data)
         page_df['date'] = datetime.datetime.now()
         return page_df
@@ -210,6 +213,7 @@ class LinkedIn:
         collection.insert_many(records)
 
         print(f"{len(records)} records inserted successfully!")
+
 
 obj = LinkedIn()
 obj.login()
