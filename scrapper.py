@@ -1,12 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 import time
 import pandas as pd
 import numpy as np
-from selenium.webdriver.chrome.service import Service
 from pymongo import MongoClient
 import datetime
 
@@ -39,7 +37,7 @@ def safe_get_text(driver, xpath, retries=3, delay=1, direct_text_only=False):
                 return np.nan
             
 
-class LinkedIn:
+class Scrapper:
     def __init__(self):
         self.mail = ""
         self.password = ""
@@ -52,7 +50,7 @@ class LinkedIn:
                      'Location': [],
                      'employment_type': [],
                      'work_type': [],
-                     'Total_applicants': [],
+                     'applicants': [],
                      'Industry':[],
                      'Employee_count': [],
                      'LinkedIn_Followers': []
@@ -61,11 +59,11 @@ class LinkedIn:
     def login(self):
         self.driver.maximize_window()
         self.driver.get('https://www.linkedin.com/login')
-        mail_box = self.driver.find_element(By.ID, "username")
-        mail_box.send_keys(self.mail)
+        mail = self.driver.find_element(By.ID, "username")
+        mail.send_keys(self.mail)
 
-        password_box = self.driver.find_element(By.ID, "password")
-        password_box.send_keys(self.password)
+        password = self.driver.find_element(By.ID, "password")
+        password.send_keys(self.password)
         button = self.driver.find_element(By.CLASS_NAME, "btn__primary--large")
         time.sleep(0.5)
         button.click()
@@ -82,13 +80,13 @@ class LinkedIn:
             'Location': [],
             'employment_type': [],
             'work_type': [],
-            'Total_applicants': [],
+            'applicants': [],
             'Industry': [],
             'Employee_count': [],
             'LinkedIn_Followers': []
         }
         
-        for i in range(1, 21):
+        for i in range(1, 26):
             time.sleep(0.5)
             jobs = None
             base_div = None
@@ -132,11 +130,11 @@ class LinkedIn:
                 page_data['Name'].append(np.nan)
 
             try:
-                com_location = safe_get_text(
+                company_location = safe_get_text(
                     self.driver,
                     f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[1]'
                 )
-                page_data['Location'].append(com_location)
+                page_data['Location'].append(company_location)
             except NoSuchElementException:
                 page_data['Location'].append(np.nan)
 
@@ -169,10 +167,10 @@ class LinkedIn:
             time.sleep(1)
 
             try:
-                num_of_applicants = safe_get_text(self.driver, f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[5]')
-                page_data['Total_applicants'].append(num_of_applicants)
+                applicants = safe_get_text(self.driver, f'/html/body/div[{base_div}]/div[3]/div[4]/div/div/main/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[3]/div/span/span[5]')
+                page_data['applicants'].append(applicants)
             except NoSuchElementException:
-                page_data['Total_applicants'].append(np.nan)
+                page_data['applicants'].append(np.nan)
             time.sleep(1)
 
             try:
@@ -198,7 +196,7 @@ class LinkedIn:
         page_df['date'] = datetime.datetime.now()
         return page_df
 
-    def create_and_store(self,page_df):
+    def save(self,page_df):
         if page_df.empty:
             print("page_df is empty. Skipping insertion.")
             return
@@ -215,13 +213,11 @@ class LinkedIn:
         print(f"{len(records)} records inserted successfully!")
 
 
-obj = LinkedIn()
-obj.login()
-flag = [i for i in range(0, 500, 25)]
-flag.remove(0)
-flag.insert(0, 1)
+ins = Scrapper()
+ins.login()
+flag = [1] + list(range(25, 500, 25))
 for i in flag:
-    page_df = obj.data_collection(f'https://www.linkedin.com/jobs/search/?currentJobId=4304009679&start={i}')
-    obj.create_and_store(page_df)
+    page_df = ins.data_collection(f'https://www.linkedin.com/jobs/search/?currentJobId=4304009679&start={i}')
+    ins.save(page_df)
 
-obj.data.to_csv('hello.csv', index=False)
+ins.data.to_csv('data.csv', index=False)
