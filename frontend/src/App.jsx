@@ -40,7 +40,7 @@ ChartJS.register(
   Legend
 );
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_BACKEND_API_URL;
 
 const INSIGHTS = [
   {
@@ -375,7 +375,6 @@ export default function JobScoutAI() {
             className="bg-gray-900 w-[95%] max-w-3xl rounded-2xl shadow-2xl border border-gray-700 p-6 relative animate-fadeIn"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               onClick={() => setOpen(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-white"
@@ -383,12 +382,10 @@ export default function JobScoutAI() {
               ✕
             </button>
 
-            {/* Title */}
             <h2 className="text-xl font-semibold mb-4 text-gray-100 text-center">
               AI Assistant
             </h2>
 
-            {/* Textarea */}
             <textarea
               value={Prompt}
               onChange={onPromptChange}
@@ -396,13 +393,11 @@ export default function JobScoutAI() {
               className="w-full h-32 resize-none border border-gray-700 bg-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
 
-            {/* Response Box */}
             {Response && <div
               className="mt-4 text-sm text-gray-300 max-h-48 overflow-y-auto border border-gray-700 rounded-lg p-3 bg-gray-800"
               dangerouslySetInnerHTML={{ __html: Response }}
             />}
 
-            {/* Buttons */}
             {Generating ? (
               <button
                 type="button"
@@ -470,7 +465,6 @@ export default function JobScoutAI() {
       </header>
 
       <div className="flex max-w-7xl mx-auto p-6 gap-6">
-        {/* Sidebar */}
         <aside className="w-64 flex-shrink-0">
           <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-4 sticky top-24">
             <div className="flex items-center justify-around py-3">
@@ -511,10 +505,8 @@ export default function JobScoutAI() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 min-w-0">
           <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-700/50 p-6">
-            {/* Chart Type Selector */}
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-700/50">
               <div>
                 <h2 className="text-2xl font-bold text-gray-100">
@@ -541,7 +533,6 @@ export default function JobScoutAI() {
               </div>
             </div>
 
-            {/* Chart Area */}
             <div
               className="bg-gray-900/50 rounded-xl p-6 border border-gray-700/30"
               style={{ height: "600px" }}
