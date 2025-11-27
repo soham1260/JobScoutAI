@@ -169,7 +169,6 @@ This will push raw job data to **MongoDB → DailyData**.
 #  3. Run Cleaning Pipeline (Backend ETL)
 
 ```
-cd JobScoutAI-backend/pipeline
 python clean_data.py
 ```
 
@@ -210,6 +209,7 @@ http://127.0.0.1:5000
 #  5. Run Frontend (React + Vite)
 
 ```
+cd frontend
 npm install
 npm run dev
 ```
@@ -238,6 +238,7 @@ Gemini AI → answers insight queries
 ```
 
 ---
+
 
 
 
