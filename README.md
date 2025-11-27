@@ -169,7 +169,6 @@ This will push raw job data to **MongoDB → DailyData**.
 #  3. Run Cleaning Pipeline (Backend ETL)
 
 ```
-cd JobScoutAI-backend/pipeline
 python clean_data.py
 ```
 
@@ -190,6 +189,7 @@ This writes 18+ insights to `Insights_Daily`.
 #  4. Run Backend (Flask API)
 
 ```
+cd frontend
 pip install -r requirements.txt
 python app.py
 ```
@@ -238,6 +238,7 @@ Gemini AI → answers insight queries
 ```
 
 ---
+
 
 
 
